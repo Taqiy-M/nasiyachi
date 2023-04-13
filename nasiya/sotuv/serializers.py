@@ -40,3 +40,14 @@ class PaymentSerializer(ModelSerializer):
         model = Payment
         fields = "__all__"
         read_only_fields = ["staff"]
+
+    def validate(self, data):
+        errors = {}
+        # Check that required fields are not null
+        for field_name in ['purchase', 'money']:
+            if not data.get(field_name):
+                errors[field_name] = f"{field_name} field is required"
+
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
