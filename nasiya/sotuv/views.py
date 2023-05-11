@@ -9,26 +9,63 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import status
+from django.core.exceptions import FieldError
 
 from .models import Purchase, Customer, Category, PurchaseItem, Staff, Payment
 from .serializers import PurchaseSerializer, CustomerSerializer, CategorySerializer, PaymentSerializer
 
 
-class CustomerViewSet(ModelViewSet):
+class CustomModelViewSet(ModelViewSet):
+    def handle_exception(self, exc):
+        if isinstance(exc, FieldError):
+            return self.handle_field_error(exc)
+        if isinstance(exc, AttributeError):
+            return self.handle_attribute_error(exc)
+        if isinstance(exc, ValueError):
+            return self.handle_value_error(exc)
+        return super().handle_exception(exc)
+
+    def handle_field_error(self, exc):
+        return Response(
+            {'detail': 'Invalid field name: {}'.format(str(exc))},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def handle_attribute_error(self, exc):
+        return Response(
+            {'detail': 'Invalid attribute: {}'.format(str(exc))},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def handle_value_error(self, exc):
+        return Response(
+            {'detail': 'Invalid value: {}'.format(str(exc))},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+class CustomerViewSet(CustomModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     authentication_classes = [TokenAuthentication, ]
     permission_classes = [IsAuthenticated, ]
 
+    @action(detail=True, methods=['get'])
+    def purchases(self, request, pk=None):
+        customer = self.get_object()
+        purchases = customer.purchases.all()
+        serializer = PurchaseSerializer(purchases, many=True)
+        return Response(serializer.data)
 
-class CategoryViewSet(ModelViewSet):
+
+class CategoryViewSet(CustomModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     authentication_classes = [TokenAuthentication, ]
     permission_classes = [IsAuthenticated, ]
 
 
-class PurchaseViewSet(ModelViewSet):
+class PurchaseViewSet(CustomModelViewSet):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
     authentication_classes = [TokenAuthentication, ]
@@ -81,37 +118,30 @@ class PurchaseViewSet(ModelViewSet):
         # getting intervals as a list
 
         intervals = list(map(int, created_purchase.interval_dates.replace(" ", "").split(',')))
-        next_payment_integer_id = intervals.index(created_purchase.next_payment_date)
+        # next_payment_integer_id = intervals.index(created_purchase.next_payment_date.day)
         # shu joyda FRONT-END chi hal qilishi kerak bo'lgan ish bor:
         # masalan, interval uchun 3 ta sana belgilansa,
         # next_payment_date shu 3 tadan bittasi bo'lishi shart!!!
 
         # getting remainder debt which is a = cost - first_payment
         # then we use this remainder in following loop
-        a = created_purchase.product_cost - created_purchase.first_payment
+        a = created_purchase.nasiya_cost - created_purchase.first_payment
         created_purchase.current_debt = a
         rem = a - created_purchase.base_price
 
 
         created_purchase.save()
-        tday = datetime.date.today()
-        month = 0
-        year = 0
-        if intervals[-1] > tday.day:
-            month = tday.month
-            year = tday.year
-        else:
-            if month == 12:
-                month = 1
-                year += 1
-            else:
-                month += 1
+        start_date = created_purchase.next_payment_date
+        rem = rem - created_purchase.base_price
+        PurchaseItem.objects.create(purchase=created_purchase, completed=False, remainder_debt=rem, date=start_date)
+
+        intervals[]
 
 
         # creating several PurchaseItems and assigning their dates
         while rem >= 0:
-            a = next_payment_integer_id % len(intervals)
-            datee = datetime.date(year=year, month=month, day=intervals[a])
+
+            datee = datetime.date(year=, month=, day=intervals[])
             if intervals[-1] == intervals[a]:
                 month = (month % 12) + 1
                 if month == 1:
@@ -133,7 +163,7 @@ class PurchaseViewSet(ModelViewSet):
         return response
 
 
-class PaymentViewSet(ModelViewSet):
+class PaymentViewSet(CustomModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     authentication_classes = [TokenAuthentication, ]

@@ -25,7 +25,8 @@ class PurchaseSerializer(ModelSerializer):
     def validate(self, data):
         errors = {}
         # Check that required fields are not null
-        for field_name in ['customer', 'created_date', 'product_name', 'product_cost', 'product_category', 'base_price',
+        for field_name in ['customer', 'created_date', 'product_name', 'original_price', 'nasiya_cost',
+                           'product_category', 'base_price',
                            'purchase_description', 'interval_dates', 'first_payment']:
             if not data.get(field_name):
                 errors[field_name] = f"{field_name} field is required"

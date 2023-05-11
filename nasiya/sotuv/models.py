@@ -37,15 +37,17 @@ class Purchase(models.Model):
     created_date = models.DateField(null=True, blank=True)
     product_name = models.CharField(max_length=50, null=True, blank=True)
     product_category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    product_cost = models.IntegerField(null=True, blank=True, default=0)
+    original_price = models.IntegerField(null=True, blank=True, default=0)
+    nasiya_cost = models.IntegerField(null=True, blank=True, default=0)
     base_price = models.IntegerField(null=True, blank=True, default=0)
     purchase_description = models.TextField(null=True, blank=True)
     interval_dates = models.CharField(max_length=50, default="10")
     completed = models.BooleanField(default=False, null=True)
     first_payment = models.PositiveIntegerField(null=True, default=0)
     current_debt = models.PositiveIntegerField(null=True)
-    next_payment_date = models.PositiveIntegerField()
+    next_payment_date = models.DateField()
     final_payment_date = models.DateField(null=True, default=None)
+
 
     def __str__(self):
         return self.customer.name
