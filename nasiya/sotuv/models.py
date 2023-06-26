@@ -48,7 +48,6 @@ class Purchase(models.Model):
     next_payment_date = models.DateField()
     final_payment_date = models.DateField(null=True, default=None)
 
-
     def __str__(self):
         return self.customer.name
 
