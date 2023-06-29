@@ -48,7 +48,7 @@ class PurchaseCreateSerializer(ModelSerializer):
         errors = {}
         # Check that required fields are not null
         for field_name in ['customer', 'created_date', 'product_name', 'original_price', 'nasiya_cost', 'product_category', 'base_price',
-                           'purchase_description', 'interval_dates', 'first_payment']:
+                           'purchase_description', 'interval_dates', 'first_payment', 'store']:
             if not data.get(field_name):
                 errors[field_name] = f"{field_name} field is required"
 
@@ -57,10 +57,8 @@ class PurchaseCreateSerializer(ModelSerializer):
         return data
 
 
-
 class PurchaseSerializer(ModelSerializer):
     customer = CustomerSerializerSpecial()
-
     class Meta:
         model = Purchase
         fields = "__all__"
@@ -83,7 +81,7 @@ class PurchaseSerializer(ModelSerializer):
 class PurchaseItemSerializer(ModelSerializer):
     class Meta:
         model = PurchaseItem
-        fields  = ['date', 'completed', 'purchase']
+        fields = ['date', 'completed', 'purchase']
         read_only_fields = ['date', 'completed', 'purchase']
 
 

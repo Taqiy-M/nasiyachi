@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User
 from django.db import models
-
-
 # Create your models here.
+from ombor.models import Store
+
+
 class Staff(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     passcode = models.CharField(max_length=50, null=True)
     phone = models.CharField(max_length=30, null=True)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, default=None)
 
     def __str__(self):
         return self.user.username
@@ -16,6 +18,7 @@ class Customer(models.Model):
     name = models.CharField(max_length=30)
     passport_num = models.CharField(max_length=9, null=True)
     phone_num = models.CharField(max_length=30)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, default=None)
 
     def __str__(self):
         return self.name
@@ -26,6 +29,8 @@ class Category(models.Model):
     description = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     photo = models.FileField(null=True, blank=True)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, default=None)
+
 
     def __str__(self):
         return self.name
@@ -47,6 +52,8 @@ class Purchase(models.Model):
     current_debt = models.PositiveIntegerField(null=True)
     next_payment_date = models.DateField()
     final_payment_date = models.DateField(null=True, default=None)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, default=None)
+
 
     def __str__(self):
         return self.customer.name
@@ -77,6 +84,8 @@ class Payment(models.Model):
     money = models.IntegerField(default=0)
     date = models.DateTimeField()
     phone = models.CharField(max_length=30)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, default=None)
+
 
     # def __str__(self):
     #     return self.purchase.customer.name

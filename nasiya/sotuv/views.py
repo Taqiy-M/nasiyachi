@@ -21,7 +21,6 @@ from rest_framework import status
 from django.core.exceptions import FieldError
 
 
-
 class CustomModelViewSet(ModelViewSet):
     def handle_exception(self, exc):
         if isinstance(exc, FieldError):
@@ -74,7 +73,6 @@ class CategoryViewSet(CustomModelViewSet):
     serializer_class = CategorySerializer
     authentication_classes = [TokenAuthentication, ]
     permission_classes = [IsAuthenticated, ]
-
 
 
 class PurchasePagination(PageNumberPagination):
